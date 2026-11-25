@@ -1,0 +1,18 @@
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil5\Core\ARM\ARMCC\Bin'
+Build target 'stm32f407vet6'
+compiling stm32f4xx_it.c...
+..\..\User\stm32f4xx_it.c(174): warning:  #1-D: last line of file ends without a newline
+  }
+..\..\User\stm32f4xx_it.c: 1 warning, 0 errors
+compiling lv_port_disp.c...
+compiling main.c...
+..\..\User\main.c(108): warning:  #1-D: last line of file ends without a newline
+  }
+..\..\User\main.c(46): warning:  #177-D: function "reboot_cb"  was declared but never referenced
+  static void reboot_cb(lv_event_t *e)
+..\..\User\main.c: 2 warnings, 0 errors
+linking...
+Program Size: Code=157110 RO-data=87526 RW-data=216 ZI-data=101712  
+FromELF: creating hex file...
+"..\..\Output\atk_f407.axf" - 0 Error(s), 3 Warning(s).
+Build Time Elapsed:  00:00:14

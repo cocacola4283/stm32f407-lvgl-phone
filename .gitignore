@@ -1,0 +1,37 @@
+# ---- Keil 编译产物 ----
+Output/
+Objects/
+Listings/
+*.o
+*.d
+*.crf
+*.axf
+*.hex
+*.bin
+*.map
+*.lnp
+*.htm
+*.dep
+*.bak
+*.iex
+*.sct
+*.lst
+
+# ---- Keil 用户个人设置（每个人不同，不该入库）----
+*.uvguix.*
+*.uvoptx.bak
+JLinkLog.txt
+JLinkSettings.ini
+
+# ---- 编辑器 / 系统 ----
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
+
+# ---- LVGL 里用不到的 GUI Guider 旧 demo（省 9MB）----
+Middlewares/LVGL/APPS/
+
+# ---- 本地备份 ----
+.backup*/
+*.zip

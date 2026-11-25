@@ -1,0 +1,13 @@
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil5\Core\ARM\ARMCC\Bin'
+Build target 'stm32f407vet6'
+compiling gui_2048.c...
+..\..\GUI\game2048\gui_2048.c(159): warning:  #177-D: function "board_redraw"  was declared but never referenced
+  static void board_redraw(void)
+..\..\GUI\game2048\gui_2048.c(224): warning:  #177-D: function "board_has_move"  was declared but never referenced
+  static uint8_t board_has_move(void)
+..\..\GUI\game2048\gui_2048.c(250): error:  #114: function "settle_async"  was referenced but not defined
+  static void settle_async(void *p);
+..\..\GUI\game2048\gui_2048.c: 2 warnings, 1 error
+"..\..\Output\atk_f407.axf" - 1 Error(s), 2 Warning(s).
+Target not created.
+Build Time Elapsed:  00:00:12

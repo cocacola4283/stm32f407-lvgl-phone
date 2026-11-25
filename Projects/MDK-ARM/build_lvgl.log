@@ -1,0 +1,14 @@
+*** Using Compiler 'V5.06 update 7 (build 960)', folder: 'D:\Keil5\Core\ARM\ARMCC\Bin'
+Build target 'stm32f407vet6'
+compiling main.c...
+..\..\User\main.c(69): warning:  #177-D: function "lcd_draw_bline"  was declared but never referenced
+  static void lcd_draw_bline(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint8_t size, uint16_t color)
+..\..\User\main.c(195): warning:  #177-D: variable "POINT_COLOR_TBL"  was declared but never referenced
+  static const uint16_t POINT_COLOR_TBL[10] = {RED, GREEN, BLUE, BROWN, YELLOW,
+..\..\User\main.c: 2 warnings, 0 errors
+compiling lv_port_disp.c...
+linking...
+Program Size: Code=260648 RO-data=32776 RW-data=288 ZI-data=80920  
+FromELF: creating hex file...
+"..\..\Output\atk_f407.axf" - 0 Error(s), 2 Warning(s).
+Build Time Elapsed:  00:00:13
