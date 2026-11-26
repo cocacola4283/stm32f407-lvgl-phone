@@ -35,3 +35,6 @@ Middlewares/LVGL/APPS/
 # ---- 本地备份 ----
 .backup*/
 *.zip
+
+# ---- 编译日志 ----
+*.log

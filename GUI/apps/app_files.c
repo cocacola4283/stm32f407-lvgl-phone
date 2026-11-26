@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_SHOW     200       /* 最多显示多少条 */
+#define MAX_SHOW     80        /* 最多显示多少条（每条吃 LVGL 堆，别太大） */
 #define ROW_H        20
 
 static lv_obj_t *g_list;
@@ -59,7 +59,12 @@ static void files_refresh(void)
     n = fat_root_count(&g_fs);
     g_count = n;
 
-    sprintf(buf, "FAT%u  %lu entries", (unsigned)g_fs.type, (unsigned long)n);
+    {
+        lv_mem_monitor_t mon;
+        lv_mem_monitor(&mon);
+        sprintf(buf, "FAT%u %lu files | MEM %uK free", (unsigned)g_fs.type,
+                (unsigned long)n, (unsigned)(mon.free_size / 1024U));
+    }
     lv_label_set_text(g_status, buf);
 
     if (n > MAX_SHOW)
@@ -87,26 +92,20 @@ static void files_refresh(void)
         lv_obj_set_style_bg_color(row, lv_color_hex(((i & 1) != 0) ? 0x2E3B46 : 0x263238), LV_PART_MAIN);
         lv_obj_clear_flag(row, LV_OBJ_FLAG_SCROLLABLE);
 
-        /* 文件名 */
-        lb = lv_label_create(row);
-        lv_label_set_text(lb, ent.name);
-        lv_obj_set_style_text_color(lb, lv_color_hex(0xFFFFFF), LV_PART_MAIN);
-        lv_obj_set_pos(lb, 4, 3);
-
-        /* 目录 / 大小 */
+        /* 名字 + 大小合成一行文字（每行只建 1 个 label，省一半内存） */
         if ((ent.attr & 0x10) != 0)
         {
-            strcpy(buf, "<DIR>");
+            sprintf(buf, "%-13s    <DIR>", ent.name);
         }
         else
         {
             kb = (ent.size + 1023U) / 1024U;
-            sprintf(buf, "%lu KB", (unsigned long)kb);
+            sprintf(buf, "%-13s %6luK", ent.name, (unsigned long)kb);
         }
         lb = lv_label_create(row);
         lv_label_set_text(lb, buf);
-        lv_obj_set_style_text_color(lb, lv_color_hex(0x80CBC4), LV_PART_MAIN);
-        lv_obj_align(lb, LV_ALIGN_RIGHT_MID, -4, 0);
+        lv_obj_set_style_text_color(lb, lv_color_hex(0xE0E0E0), LV_PART_MAIN);
+        lv_obj_set_pos(lb, 4, 3);
     }
 }
 

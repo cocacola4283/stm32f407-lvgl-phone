@@ -22,6 +22,9 @@ lv_obj_t *app_make_back_btn(lv_obj_t *scr);
 /* 生成"功能开发中"占位屏幕 */
 lv_obj_t *app_make_placeholder(const char *title);
 
+/* 主循环每轮调用一次（处理独占屏幕的 app） */
+void app_shell_poll(void);
+
 /* 开机入口：建桌面并显示 */
 void app_shell_start(void);
 

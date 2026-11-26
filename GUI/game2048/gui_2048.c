@@ -111,47 +111,84 @@ static void update_score_label(void)
     lv_label_set_text(g_lbl_best, buf);
 }
 
-/* 创建/重画一个格子里的块 */
-static void tile_draw(uint8_t cx, uint8_t cy, uint32_t value)
+/* ---------------- 块的固定池：16 个对象只创建一次，之后永远复用 ----------------
+ * 之前每走一步都 lv_obj_delete + lv_obj_create（一步就是 32 个对象），
+ * 玩久了会把 LVGL 的堆打出碎片 → 内存耗尽 → 卡死不动。
+ * 改成固定池后不再有申请/释放，彻底消除这个隐患，也更快。
+ */
+static lv_obj_t *g_pool_obj[16];
+static lv_obj_t *g_pool_lb[16];
+static uint8_t   g_pool_n;
+
+static void tile_pool_init(void)
+{
+    uint8_t i;
+
+    for (i = 0; i < 16; i++)
+    {
+        lv_obj_t *t = lv_obj_create(g_board_obj);
+
+        lv_obj_set_size(t, CELL_SIZE, CELL_SIZE);
+        lv_obj_set_style_radius(t, 4, LV_PART_MAIN);
+        lv_obj_set_style_border_width(t, 0, LV_PART_MAIN);
+        lv_obj_set_style_pad_all(t, 0, LV_PART_MAIN);
+        lv_obj_set_style_bg_opa(t, LV_OPA_COVER, LV_PART_MAIN);
+        lv_obj_clear_flag(t, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_add_flag(t, LV_OBJ_FLAG_HIDDEN);
+
+        g_pool_lb[i] = lv_label_create(t);
+        lv_obj_center(g_pool_lb[i]);
+
+        g_pool_obj[i] = t;
+    }
+    g_pool_n = 0;
+}
+
+/* 从池里取一个对象，设成指定格子/数值 */
+static lv_obj_t *tile_take(uint8_t cx, uint8_t cy, uint32_t value)
 {
     lv_obj_t *t;
-    lv_obj_t *lb;
     char      buf[16];
     uint8_t   idx = value_to_idx(value);
 
-    t = lv_obj_create(g_board_obj);
+    if (g_pool_n >= 16U)
+    {
+        return NULL;
+    }
+    t = g_pool_obj[g_pool_n];
+
+    lv_anim_delete(t, NULL);                       /* 掐掉可能残留的动画 */
     lv_obj_set_pos(t, cell_px_x(cx), cell_px_y(cy));
-    lv_obj_set_size(t, CELL_SIZE, CELL_SIZE);
-    lv_obj_set_style_radius(t, 4, LV_PART_MAIN);
-    lv_obj_set_style_border_width(t, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(t, 0, LV_PART_MAIN);
     lv_obj_set_style_bg_color(t, lv_color_hex(idx < 11 ? g_tile_bg[idx] : 0x3C3A32), LV_PART_MAIN);
-    lv_obj_clear_flag(t, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_style_opa(t, LV_OPA_COVER, LV_PART_MAIN);
 
-    lb = lv_label_create(t);
     sprintf(buf, "%lu", (unsigned long)value);
-    lv_label_set_text(lb, buf);
-    lv_obj_set_style_text_color(lb, lv_color_hex(idx <= 1 ? 0x776E65 : 0xFFFFFF), LV_PART_MAIN);
-    lv_obj_center(lb);
+    lv_label_set_text(g_pool_lb[g_pool_n], buf);
+    lv_obj_set_style_text_color(g_pool_lb[g_pool_n],
+                                lv_color_hex(idx <= 1 ? 0x776E65 : 0xFFFFFF), LV_PART_MAIN);
 
-    g_tiles[cx][cy] = t;
+    lv_obj_clear_flag(t, LV_OBJ_FLAG_HIDDEN);
+    g_pool_n++;
+    return t;
 }
 
-/* 清空所有块对象 */
+/* 清空所有块（只隐藏，不删除对象） */
 static void tiles_clear(void)
 {
-    uint8_t x, y;
+    uint8_t i, x, y;
+
+    for (i = 0; i < 16; i++)
+    {
+        lv_anim_delete(g_pool_obj[i], NULL);
+        lv_obj_add_flag(g_pool_obj[i], LV_OBJ_FLAG_HIDDEN);
+    }
+    g_pool_n = 0;
 
     for (x = 0; x < 4; x++)
     {
         for (y = 0; y < 4; y++)
         {
-            if (g_tiles[x][y] != NULL)
-            {
-                lv_anim_delete(g_tiles[x][y], NULL);   /* 先掐掉它身上的动画（含淡入），否则动画会访问已释放内存 → 死机 */
-                lv_obj_delete(g_tiles[x][y]);
-                g_tiles[x][y] = NULL;
-            }
+            g_tiles[x][y] = NULL;
         }
     }
 }
@@ -168,7 +205,7 @@ static void board_redraw(void)
         {
             if (g_board[x][y] != 0)
             {
-                tile_draw(x, y, g_board[x][y]);
+                g_tiles[x][y] = tile_take(x, y, g_board[x][y]);
             }
         }
     }
@@ -202,23 +239,24 @@ static void spawn_random(void)
     pick = lv_rand(0, (uint32_t)n - 1U);
     val  = (lv_rand(0, 9) == 0) ? 4U : 2U;
 
+    t = tile_take(empty[pick][0], empty[pick][1], val);
+    if (t == NULL)
+    {
+        return;
+    }
     g_board[empty[pick][0]][empty[pick][1]] = val;
-    tile_draw(empty[pick][0], empty[pick][1], val);
+    g_tiles[empty[pick][0]][empty[pick][1]] = t;
 
     /* 淡入 */
-    t = g_tiles[empty[pick][0]][empty[pick][1]];
-    if (t != NULL)
+    lv_obj_set_style_opa(t, LV_OPA_0, LV_PART_MAIN);
     {
-        lv_obj_set_style_opa(t, LV_OPA_0, LV_PART_MAIN);
-        {
-            lv_anim_t a;
-            lv_anim_init(&a);
-            lv_anim_set_var(&a, t);
-            lv_anim_set_exec_cb(&a, opa_anim_cb);
-            lv_anim_set_values(&a, LV_OPA_0, LV_OPA_COVER);
-            lv_anim_set_duration(&a, 120);
-            lv_anim_start(&a);
-        }
+        lv_anim_t a;
+        lv_anim_init(&a);
+        lv_anim_set_var(&a, t);
+        lv_anim_set_exec_cb(&a, opa_anim_cb);
+        lv_anim_set_values(&a, LV_OPA_0, LV_OPA_COVER);
+        lv_anim_set_duration(&a, 120);
+        lv_anim_start(&a);
     }
 }
 
@@ -621,6 +659,8 @@ lv_obj_t *app_2048_create(void)
             }
         }
     }
+
+    tile_pool_init();          /* 16 个块对象一次性建好，之后复用 */
 
     /* 右侧方向键 */
     make_btn(scr, 226, 56,  44, 34, LV_SYMBOL_UP,    btn_dir_cb, (void *)(uintptr_t)G2048_UP);

@@ -340,7 +340,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F407xx,LV_CONF_INCLUDE_SIMPLE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Drivers;..\..\Drivers\CMSIS\Include;..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\..\Drivers\STM32F4xx_HAL_Driver\Inc;..\..\Middlewares;..\..\User;..\..\Drivers\BSP;..\..\Drivers\BSP\LCD;..\..\Drivers\SYSTEM\sys;..\..\Middlewares\LVGL\LVGL_SRC\lvgl;..\..\Middlewares\LVGL\LVGL_SRC\lvgl\examples\porting;..\..\Middlewares\LVGL\LVGL_SRC;..\..\GUI\generated;..\..\GUI\generated\assets\fonts;..\..\GUI\generated\assets\images;..\..\GUI\generated\events;..\..\GUI\generated\screens;..\..\GUI\custom;..\..\GUI\game2048;..\..\GUI\apps</IncludePath>
+              <IncludePath>..\..\Drivers;..\..\Drivers\CMSIS\Include;..\..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\..\Drivers\STM32F4xx_HAL_Driver\Inc;..\..\Middlewares;..\..\User;..\..\Drivers\BSP;..\..\Drivers\BSP\LCD;..\..\Drivers\SYSTEM\sys;..\..\Middlewares\LVGL\LVGL_SRC\lvgl;..\..\Middlewares\LVGL\LVGL_SRC\lvgl\examples\porting;..\..\Middlewares\LVGL\LVGL_SRC;..\..\GUI\generated;..\..\GUI\generated\assets\fonts;..\..\GUI\generated\assets\images;..\..\GUI\generated\events;..\..\GUI\generated\screens;..\..\GUI\custom;..\..\GUI\game2048;..\..\GUI\apps;..\..\Middlewares\LVGL\LVGL_SRC\lvgl\src\libs\tjpgd</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -609,6 +609,26 @@
               <FileType>5</FileType>
               <FilePath>..\..\Drivers\BSP\SD\fat_ro.h</FilePath>
             </File>
+            <File>
+              <FileName>lv_fs_fat.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\SD\lv_fs_fat.c</FilePath>
+            </File>
+            <File>
+              <FileName>lv_fs_fat.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\Drivers\BSP\SD\lv_fs_fat.h</FilePath>
+            </File>
+            <File>
+              <FileName>photo_view.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Drivers\BSP\SD\photo_view.c</FilePath>
+            </File>
+            <File>
+              <FileName>photo_view.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\Drivers\BSP\SD\photo_view.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -743,6 +763,26 @@
               <FileName>app_files.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\..\GUI\apps\app_files.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_photos.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\GUI\apps\app_photos.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_photos.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\GUI\apps\app_photos.h</FilePath>
+            </File>
+            <File>
+              <FileName>app_icons.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\GUI\apps\app_icons.c</FilePath>
+            </File>
+            <File>
+              <FileName>app_icons.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\GUI\apps\app_icons.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -2013,6 +2053,21 @@
               <FileName>lv_sysmon.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Middlewares\LVGL\LVGL_SRC\lvgl\src\debugging\sysmon\lv_sysmon.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Mid/lvgl/src/libs/tjpgd</GroupName>
+          <Files>
+            <File>
+              <FileName>tjpgd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\LVGL\LVGL_SRC\lvgl\src\libs\tjpgd\tjpgd.c</FilePath>
+            </File>
+            <File>
+              <FileName>lv_tjpgd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Middlewares\LVGL\LVGL_SRC\lvgl\src\libs\tjpgd\lv_tjpgd.c</FilePath>
             </File>
           </Files>
         </Group>

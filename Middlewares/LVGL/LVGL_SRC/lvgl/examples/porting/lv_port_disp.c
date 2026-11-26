@@ -19,7 +19,7 @@
 /*********************
  *      DEFINES
  *********************/
-#define DISP_BUF_LINES      45      /* 每块 320*45*2 = 28800 字节，两块共 57.6 KB */
+#define DISP_BUF_LINES      32      /* 每块 320*32*2 = 20480 字节，两块共 40 KB（腾出 16K RAM 给 LVGL 堆） */
 #define DISP_BUF_MAX_WIDTH  320
 
 #define DISP_USE_DMA        1       /* 1 = 用 DMA 搬像素；0 = 退回 CPU 死循环 */
@@ -69,6 +69,24 @@ static void disp_dma_init(void)
 
     HAL_NVIC_SetPriority(DMA2_Stream0_IRQn, 5, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream0_IRQn);
+}
+
+/* 把一块显示缓冲借出去当临时内存（调用方必须保证 LVGL 已暂停） */
+void *lv_port_disp_get_scratch(uint32_t *size)
+{
+    if (size != NULL)
+    {
+        *size = (uint32_t)sizeof(disp_buf1);
+    }
+    return (void *)disp_buf1;
+}
+
+/* 等到 DMA 搬完当前这块（独占屏幕的应用在动手前必须调） */
+void lv_port_disp_wait_idle(void)
+{
+    while (g_dma_busy)
+    {
+    }
 }
 
 /* 给 stm32f4xx_it.c 里的 DMA2_Stream0_IRQHandler 调用 */

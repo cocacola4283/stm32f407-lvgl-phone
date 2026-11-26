@@ -464,3 +464,135 @@ uint8_t fat_read_file(fat_fs_t *fs, const fat_entry_t *e, uint8_t *buf, uint32_t
     *out_len = done;
     return 0;
 }
+
+/* ================= 文件句柄实现（给 LVGL lv_fs 用） ================= */
+
+static uint32_t cluster_bytes(fat_fs_t *fs)
+{
+    return fs->spc * SECTOR_SIZE;
+}
+
+/* 按 pos 定位到相应簇 */
+static uint8_t file_locate(fat_file_t *f)
+{
+    uint32_t cs  = cluster_bytes(f->fs);
+    uint32_t idx = f->pos / cs;
+    uint32_t c   = f->first_cluster;
+    uint32_t i;
+
+    if (idx == 0)
+    {
+        f->cur_cluster = c;
+        return 0;
+    }
+    for (i = 0; i < idx; i++)
+    {
+        c = next_cluster(f->fs, c);
+        if (c == 0xFFFFFFFFU)
+        {
+            return 1;
+        }
+    }
+    f->cur_cluster = c;
+    return 0;
+}
+
+const char *fat_basename(const char *path)
+{
+    const char *p = path;
+    const char *last = path;
+
+    while (*p != '\0')
+    {
+        if (*p == '/' || *p == '\\')
+        {
+            last = p + 1;
+        }
+        p++;
+    }
+    return last;
+}
+
+uint8_t fat_open(fat_fs_t *fs, const char *name, fat_file_t *f)
+{
+    fat_entry_t ent;
+
+    memset(f, 0, sizeof(*f));
+
+    if (fat_find(fs, fat_basename(name), &ent) != 0)
+    {
+        return 1;
+    }
+    if ((ent.attr & 0x10) != 0)
+    {
+        return 2;
+    }
+
+    f->fs            = fs;
+    f->first_cluster = ent.first_cluster;
+    f->size          = ent.size;
+    f->pos           = 0;
+    f->cur_cluster   = ent.first_cluster;
+    return 0;
+}
+
+uint32_t fat_read(fat_file_t *f, void *buf, uint32_t len)
+{
+    uint8_t *out = (uint8_t *)buf;
+    uint32_t done = 0;
+    uint32_t cs   = cluster_bytes(f->fs);
+
+    if ((f->fs == NULL) || (f->size == 0))
+    {
+        return 0;
+    }
+
+    while ((done < len) && (f->pos < f->size))
+    {
+        uint32_t off    = f->pos % cs;
+        uint32_t lba    = f->fs->data_lba + ((f->cur_cluster - 2U) * f->fs->spc) + (off / SECTOR_SIZE);
+        uint32_t in_sec = off % SECTOR_SIZE;
+        uint32_t chunk  = SECTOR_SIZE - in_sec;
+
+        if (chunk > (len - done))
+        {
+            chunk = len - done;
+        }
+        if (chunk > (f->size - f->pos))
+        {
+            chunk = f->size - f->pos;
+        }
+        if (rd_sector(lba) != 0)
+        {
+            break;
+        }
+        memcpy(&out[done], &g_sec[in_sec], chunk);
+        done   += chunk;
+        f->pos += chunk;
+
+        if (((f->pos % cs) == 0U) && (f->pos < f->size))
+        {
+            uint32_t nc = next_cluster(f->fs, f->cur_cluster);
+            if (nc == 0xFFFFFFFFU)
+            {
+                break;
+            }
+            f->cur_cluster = nc;
+        }
+    }
+    return done;
+}
+
+uint8_t fat_seek(fat_file_t *f, uint32_t pos)
+{
+    if (f->fs == NULL)
+    {
+        return 1;
+    }
+    if (pos > f->size)
+    {
+        pos = f->size;
+    }
+    f->pos = pos;
+    return file_locate(f);
+}

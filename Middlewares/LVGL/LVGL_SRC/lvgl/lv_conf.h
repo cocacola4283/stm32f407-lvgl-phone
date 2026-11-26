@@ -69,7 +69,7 @@
 
 #if LV_USE_STDLIB_MALLOC == LV_STDLIB_BUILTIN
     /** Size of memory available for `lv_malloc()` in bytes (>= 2kB) */
-    #define LV_MEM_SIZE (32 * 1024U)          /**< [bytes] */
+    #define LV_MEM_SIZE (48 * 1024U)          /**< [bytes] */
 
     /** Size of the memory expand for `lv_malloc()` in bytes */
     #define LV_MEM_POOL_EXPAND_SIZE 0
@@ -175,7 +175,7 @@
      */
     #define LV_DRAW_SW_SUPPORT_RGB565       1
     #define LV_DRAW_SW_SUPPORT_RGB565_SWAPPED 0
-    #define LV_DRAW_SW_SUPPORT_RGB565A8 0
+    #define LV_DRAW_SW_SUPPORT_RGB565A8     1
     #define LV_DRAW_SW_SUPPORT_RGB888 0
     #define LV_DRAW_SW_SUPPORT_XRGB8888 0
     #define LV_DRAW_SW_SUPPORT_ARGB8888 0
@@ -786,7 +786,7 @@
 
 #define LV_USE_DROPDOWN 0   /**< Requires: lv_label */
 
-#define LV_USE_IMAGE 0   /**< Requires: lv_label */
+#define LV_USE_IMAGE 1   /**< Requires: lv_label */
 
 #define LV_USE_IMAGEBUTTON 0
 
@@ -972,7 +972,7 @@
 
 /** JPG + split JPG decoder library.
  *  Split JPG is a custom format optimized for embedded systems. */
-#define LV_USE_TJPGD 0
+#define LV_USE_TJPGD     1
 
 /** libjpeg-turbo decoder library.
  *  - Supports complete JPEG specifications and high-performance JPEG decoding. */

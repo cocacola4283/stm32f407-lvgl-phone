@@ -70,5 +70,23 @@ uint8_t fat_find(fat_fs_t *fs, const char *name, fat_entry_t *out);
  * @retval 0=成功
  */
 uint8_t fat_read_file(fat_fs_t *fs, const fat_entry_t *e, uint8_t *buf, uint32_t maxlen, uint32_t *out_len);
+/* ---------------- 文件句柄（给 LVGL 的 lv_fs 驱动用） ---------------- */
+typedef struct
+{
+    fat_fs_t *fs;
+    uint32_t  first_cluster;
+    uint32_t  size;
+    uint32_t  pos;
+    uint32_t  cur_cluster;
+} fat_file_t;
+
+/* 打开根目录下的文件（8.3 名），0=成功 */
+uint8_t  fat_open(fat_fs_t *fs, const char *name, fat_file_t *f);
+/* 顺序读，返回实际读到的字节数 */
+uint32_t fat_read(fat_file_t *f, void *buf, uint32_t len);
+/* 定位到 pos（0=成功） */
+uint8_t  fat_seek(fat_file_t *f, uint32_t pos);
+/* 当前绝对路径/文件名里的文件名部分（跳过 /A/B/ 前缀） */
+const char *fat_basename(const char *path);
 
 #endif

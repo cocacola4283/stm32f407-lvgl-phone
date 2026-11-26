@@ -40,6 +40,7 @@
 #include "custom.h"
 #include "gui_2048.h"
 #include "app_shell.h"
+#include "./BSP/SD/lv_fs_fat.h"
 
 gg_ui_t guider_ui;
 /* 触摸 RST 按钮的回调：软复位 */
@@ -78,6 +79,8 @@ int main(void)
     lv_port_disp_init();
     lv_port_indev_init();
 
+    lv_fs_fat_init();                   /* 注册 SD 卡为 LVGL 的 S: 盘（读图片/资源） */
+
     /* 手机桌面：主菜单 + app 切换 */
     app_shell_start();
 
@@ -101,6 +104,7 @@ int main(void)
                 NVIC_SystemReset();
             }
 
+            app_shell_poll();                   /* 处理需要独占屏幕的 app（图片浏览） */
             lv_timer_handler();
             delay_ms(5);
         }
